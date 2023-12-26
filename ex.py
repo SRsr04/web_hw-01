@@ -8,9 +8,7 @@ from Optima.find_command import get_command
 from abc import ABC, abstractmethod
 
 class BaseView(ABC):
-    @abstractmethod
-    def handle_command(self, *args):
-        pass
+    pass
 
 class ContactView(BaseView):
     def __init__(self, records):
