@@ -1,10 +1,10 @@
 import os
 import shlex
 from pathlib import Path
-from Optima.Address_book import AddressBook, Record, DuplicatedPhoneError
-from Optima.Notes import Note, NotesList
-from Optima.Folder_sorter import sort_folders_and_return_result
-from Optima.find_command import get_command
+from Address_book import AddressBook, Record, DuplicatedPhoneError
+from Notes import Note, NotesList
+from Folder_sorter import sort_folders_and_return_result
+from find_command import get_command
 from abc import ABC, abstractmethod
 
 class BaseView(ABC):
@@ -14,13 +14,13 @@ class ContactView(BaseView):
     def __init__(self, records):
         self.records = records
 
-    @input_error([])
+    #@input_error([])
     def greeting_handler(*args):
         greeting = "How can I help you?"
         return greeting
 
-    @capitalize_user_name
-    @input_error("name", "phone")
+    #@capitalize_user_name
+    #@input_error("name", "phone")
     def add_contact_handler(*args):
         user_name = args[0]
         user_phones = args[1:]
@@ -40,8 +40,8 @@ class ContactView(BaseView):
                 response.append(f"New phone number {user_phone} for contact {user_name} added.")
             return "\n".join(response)
 
-    @capitalize_user_name    
-    @input_error("name")
+    #@capitalize_user_name    
+    #@input_error("name")
     def delete_contact_handler(*args):
         user_name = args[0]
         user_phones = args[1:]
@@ -58,8 +58,8 @@ class ContactView(BaseView):
                 return f"Record for contact {user_name} deleted."
             return f"Record for contact {user_name} not found."
 
-    @capitalize_user_name
-    @input_error("name", "old_phone", "new_phone")
+    #@capitalize_user_name
+    #@input_error("name", "old_phone", "new_phone")
     def edit_contact_handler(*args):
         user_name = args[0]
         old_phone = args[1]
@@ -69,15 +69,15 @@ class ContactView(BaseView):
             record.edit_phone(old_phone, new_phone)
             return f"Phone number for {user_name} changed from {old_phone} to {new_phone}."
 
-    @capitalize_user_name
-    @input_error("name")
+    #@capitalize_user_name
+    #@input_error("name")
     def phone_handler(*args):
         user_name = args[0]
         record = records.find(user_name)
         if record:
             return "; ".join(p.value for p in record.phones)
         
-    @input_error("query")
+    #@input_error("query")
     def search_contacts_handler(*args):
         query: str = args[0]
         contacts = records.search_contacts(query)
@@ -85,7 +85,7 @@ class ContactView(BaseView):
             return "\n".join(str(contact) for contact in contacts)
         return f"No contacts found for '{query}'."
 
-    @input_error([])
+    #@input_error([])
     def show_contacts_handler(*args):
         print("{:<10} {:<40} {:<35} {:<15} {:<60}".format("name", "phones", "email", "birthday", "address"))
         return records.iterator()
@@ -94,7 +94,7 @@ class NoteView(BaseView):
     def __init__(self, note_lists):
         self.note_lists - note_lists
     
-    @input_error("title", "text")    
+    #@input_error("title", "text")    
     def add_note_handler(*args):
         note_title = args[0] if len(args) > 1 else "Untitled"
         note_text = args[1] if len(args) > 1 else args[0]
@@ -102,7 +102,7 @@ class NoteView(BaseView):
         notes_list.append(note)
         return f"New note with title '{note_title}' and text '{note_text}' added."
 
-    @input_error("title or number")
+    #@input_error("title or number")
     def delete_note_handler(*args):
         param = " ".join(args)
         if notes_list.remove(param):
@@ -110,7 +110,7 @@ class NoteView(BaseView):
         else:
             return "Note with this title not found."
 
-    @input_error("old title or number", "new title", "new text")
+    # @input_error("old title or number", "new title", "new text")
     def edit_note_handler(*args):
         param, new_title, new_text = args[0], args[1], args[2]
         if notes_list.edit(param, new_title, new_text):
@@ -118,7 +118,7 @@ class NoteView(BaseView):
         else:
             return f"No notes found by the specified param '{param}'."
         
-    @input_error("query")
+    # @input_error("query")
     def search_notes_handler(*args):
         query = args[0]
         matches = notes_list.search(query)
@@ -127,7 +127,7 @@ class NoteView(BaseView):
         else:
             return f"No notes found for query '{query}'."
 
-    @input_error("tag")
+    # @input_error("tag")
     def search_notes_by_tag_handler(*args):
         tag = args[0]
         matches = notes_list.search_by_tag(tag)
@@ -150,8 +150,8 @@ class BirthdayView(BaseView):
     def __init__(self, birthday_date):
         self.birthday_date = birthday_date
     
-    @capitalize_user_name    
-    @input_error("name", "DD-MM-YYYY")
+    # @capitalize_user_name    
+    # @input_error("name", "DD-MM-YYYY")
     def birthday_handler(*args):
         user_name = args[0]
         user_birthday = args[1] if len(args) > 1 else None
@@ -163,7 +163,7 @@ class BirthdayView(BaseView):
             else:
                 return f"{record.days_to_birthday()} days to the next {user_name}'s birthday ({record.birthday})."
             
-    @input_error("days")
+    # @input_error("days")
     def show_birthdays_handler(*args):
         days = int(args[0])
         contacts = records.contacts_upcoming_birthdays(days)
@@ -309,25 +309,24 @@ def sort_files_handler(*args):
 
 COMMANDS = {
     help_handler(): "help",
-    greeting_handler: "hello",                        
-    add_contact_handler: "add contact",
-    delete_contact_handler: "delete contact",
-    edit_contact_handler: "edit contact",
-    phone_handler: "phone",
-    address_handler: "address",            
-    birthday_handler: "birthday",
-    email_handler: "email",            
-    search_contacts_handler: "search contacts",
-    show_contacts_handler: "show contacts",            
-    show_birthdays_handler: "show birthdays",            
-    add_note_handler: "add note",
-    delete_note_handler: "delete note",
-    edit_note_handler: "edit note",
-    search_notes_by_tag_handler: "search note tag",
-    search_notes_handler: "search note",
-    show_notes_handler: "show notes",            
-    sort_notes_by_tag_count_handler: "sort tag",
-    sort_files_handler: "sort files"
+    # gd_contact_handler: "add contact",
+    # delete_contact_handler: "delete contact",
+    # edit_contact_handler: "edit contact",
+    # phone_handler: "phone",
+    # address_handler: "address",            
+    # birthday_handler: "birthday",
+    # email_handler: "email",            
+    # search_contacts_handler: "search contacts",
+    # show_contacts_handler: "show contacts",            
+    # show_birthdays_handler: "show birthdays",            
+    # add_note_handler: "add note",
+    # delete_note_handler: "delete note",
+    # edit_note_handler: "edit note",
+    # search_notes_by_tag_handler: "search note tag",
+    # search_notes_handler: "search note",
+    # show_notes_handler: "show notes",            
+    # sort_notes_by_tag_count_handler: "sort tag",
+    # sort_files_handler: "sort files"reeting_handler: "hello",
     }
 EXIT_COMMANDS = {"good bye", "close", "exit", "stop"}
 
