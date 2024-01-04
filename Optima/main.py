@@ -340,6 +340,44 @@ def parser(text: str):
             return func, args
     return unknown_handler, shlex.split(text, posix=False)
 
+def initialize():
+    global root_path
+    root_path = Path(os.path.expanduser("~")).joinpath("OPTIMA")
+    if not root_path.exists():
+        root_path.mkdir()
+
+def main():    
+    global records, notes_list
+    initialize()
+    notes_list = NotesList(root_path)        
+    with AddressBook(str(root_path.joinpath("address_book.bin"))) as book:
+        os.system('cls' if os.name == 'nt' else 'clear')    
+        print("\33[92m" + f"Wake up {os.getlogin().title()}...")
+        print("The OPTIMA has you...")
+        print("Follow the 'help' command.")
+
+        records = book
+        while True:
+            user_input = input(">>> ")
+
+            if user_input in EXIT_COMMANDS:
+                print("Good bye!")
+                break
+            
+            func, data = parser(user_input)
+                      
+            result = func(*data)
+            
+            if isinstance(result, str):
+                print(result)
+            else:
+                for i in result:                
+                    print("\n".join(i))
+                    input("Press enter to show more records")
+
+        print ("\033[0m")
+
+
 if __name__ == "__main__":
     app = ConsoleUI()
     app.main()
